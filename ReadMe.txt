@@ -9,4 +9,4 @@ docker run -d --name e1 -p 8000:8000  exchangeservice
 
 docker build -t conversionservice .
 
-docker run -d --name e2 -p 8000:8000  conversionservice     
+docker run -d --name e2 -p 8100:8100  conversionservice     
