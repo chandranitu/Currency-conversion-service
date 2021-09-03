@@ -1,0 +1,28 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+  pre_build:
+    Commands:
+      echo Logging in to Amazon ECR...
+      $(aws ecs get-login --no-include-email --region $AWS_REGION) 
+  build:
+    commands:
+      echo Build started on `date`
+      echo Building java
+      cd Currency-exchange-service
+      mvn compile
+      mvn package
+      echo Building the Docker image...
+      docker build -t exchangeservice .
+      docker tag service/exchangeservice $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/service-registry:exchangeservice
+  post_build:
+    commands:
+      echo Build completed on date
+      echo Pushing the Docker image...
+      docker push $AWS_ACCOUNT_ID.dr.ecr.$AWS_REGION.amazonaws.com/service-registry:exchangeservice
+      echo Writing definitions file
+      printf '[{"name": "exchangeservice-container","imageUri":"%s"}]' $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/service-registry:exchangeservice >taskdefinition.json
+artifacts:
+  files: exchangeservice/taskdefinition.json
